@@ -3,7 +3,7 @@
 require './lib/charlock_holmes/version' unless defined? CharlockHolmes::VERSION
 
 Gem::Specification.new do |s|
-  s.name = %q{charlock_holmes_salsify_bundled_icu}
+  s.name = %q{charlock_holmes}
   s.version = CharlockHolmes::VERSION
   s.authors = ["Brian Lopez", "Vicent Martí", "Dan Spangenberger"]
   s.date = Time.now.utc.strftime("%Y-%m-%d")
