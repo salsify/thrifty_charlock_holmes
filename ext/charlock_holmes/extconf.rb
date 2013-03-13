@@ -86,7 +86,8 @@ Dir.chdir("#{CWD}/src") do
 end
 
 FileUtils.cp "#{CWD}/dst/lib/libmagic.a", "#{CWD}/libmagic_ext.a"
-FileUtils.rm_rf("#{CWD}/src")
+FileUtils.rm_rf("#{CWD}/src/icu")
+FileUtils.rm_rf("#{CWD}/src/file-5.08")
 
 $INCFLAGS[0,0] = " -I#{CWD}/dst/include "
 $LDFLAGS << " -L#{CWD} "
