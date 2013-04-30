@@ -1,4 +1,5 @@
 require 'mkmf'
+require 'fileutils'
 
 CWD = File.expand_path(File.dirname(__FILE__))
 def sys(cmd)
@@ -35,8 +36,18 @@ if !have_library 'icui18n'
   end
 end
 
+icu_version = "49_1_2"
+
+# If the ICU version is changed 
+bundled_icu_flag = "#{CWD}/bundled_icu_flag_#{icu_version}"
+
+if File.exists?(bundled_icu_flag)
+  $INCFLAGS << " -I#{CWD}/dst/include "
+  $LDFLAGS  << " -L#{CWD}/dst/lib"
+end
+
 unless have_library 'icui18n' and have_library 'icudata' and have_library 'icutu' and have_library 'icuuc' and have_header 'unicode/ucnv.h'
-  src = File.basename('icu4c-49_1_2-src.tgz')
+  src = File.basename("icu4c-#{icu_version}-src.tgz")
   dir = File.basename('icu')
 
   Dir.chdir("#{CWD}/src") do
@@ -51,6 +62,8 @@ unless have_library 'icui18n' and have_library 'icudata' and have_library 'icutu
   end
 
   dir_config 'icu'
+
+  FileUtils.touch(bundled_icu_flag)
 
   $INCFLAGS << " -I#{CWD}/dst/include "
   $LDFLAGS  << " -L#{CWD}/dst/lib"
