@@ -81,31 +81,40 @@ end
 # libmagic dependency
 #
 
-src = File.basename('file-5.08.tar.gz')
-dir = File.basename(src, '.tar.gz')
+libmagic_version = "5.08"
 
-Dir.chdir("#{CWD}/src") do
-  FileUtils.rm_rf(dir) if File.exists?(dir)
+bundled_libmagic_flag = "#{CWD}/bundled_libmagic_flag_#{icu_version}_#{libmagic_version}"
 
-  sys("tar zxvf #{src}")
-  Dir.chdir(dir) do
-    sys("./configure --prefix=#{CWD}/dst/ --disable-shared --enable-static --with-pic")
-    sys("patch -p0 < ../file-soft-check.patch")
-    sys("make -C src install")
-    sys("make -C magic install")
-    sys("make -C src clean")
-    sys("make -C magic clean")
+if File.exists?(bundled_libmagic_flag)
+  $LDFLAGS << " -L#{CWD} "
+else
+  src = File.basename("file-#{libmagic_version}.tar.gz")
+  dir = File.basename(src, '.tar.gz')
+
+  Dir.chdir("#{CWD}/src") do
+    FileUtils.rm_rf(dir) if File.exists?(dir)
+
+    sys("tar zxvf #{src}")
+    Dir.chdir(dir) do
+      sys("./configure --prefix=#{CWD}/dst/ --disable-shared --enable-static --with-pic")
+      sys("patch -p0 < ../file-soft-check.patch")
+      sys("make -C src install")
+      sys("make -C magic install")
+      sys("make -C src clean")
+      sys("make -C magic clean")
+    end
   end
+
+  FileUtils.cp "#{CWD}/dst/lib/libmagic.a", "#{CWD}/libmagic_ext.a"
+  FileUtils.rm_rf("#{CWD}/src/icu")
+  FileUtils.rm_rf("#{CWD}/src/file-5.08")
+
+  $INCFLAGS[0,0] = " -I#{CWD}/dst/include "
+  $LDFLAGS << " -L#{CWD} "
 end
 
-FileUtils.cp "#{CWD}/dst/lib/libmagic.a", "#{CWD}/libmagic_ext.a"
-FileUtils.rm_rf("#{CWD}/src/icu")
-FileUtils.rm_rf("#{CWD}/src/file-5.08")
-
-$INCFLAGS[0,0] = " -I#{CWD}/dst/include "
-$LDFLAGS << " -L#{CWD} "
-
 dir_config 'magic'
+
 unless have_library 'magic_ext' and have_header 'magic.h'
   STDERR.puts "\n\n"
   STDERR.puts "***************************************************************************************"
